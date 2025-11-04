@@ -204,6 +204,13 @@
         shuttle: { x: 305, y: 670 },
       };
 
+      // ==== 新增：尺寸與命中半徑（手機友善） ====
+      const PLAYER_R = 34; // 你的圓半徑
+      const PLAYER_HIT = PLAYER_R + 12; // 命中半徑，比實體略大
+      const SHUTTLE_SIZE = 120; // 你的羽球邊長
+      const SHUTTLE_R = SHUTTLE_SIZE / 2;
+      const SHUTTLE_HIT = SHUTTLE_R + 12; // 命中半徑，比實體略大
+
       function initPlayersDoubles() {
         state.players = [
           { id: "A1", x: 200, y: 1000, role: "A1", team: "A" },
@@ -258,7 +265,7 @@
           );
           c.setAttribute("cx", p.x);
           c.setAttribute("cy", p.y);
-          c.setAttribute("r", 22);
+          c.setAttribute("r", PLAYER_R);
           c.setAttribute("fill", "#0b1220");
           c.setAttribute("stroke", color);
           c.setAttribute("stroke-width", 4);
@@ -269,7 +276,7 @@
           t.setAttribute("x", p.x);
           t.setAttribute("y", p.y + 5);
           t.setAttribute("text-anchor", "middle");
-          t.setAttribute("font-size", "14");
+          t.setAttribute("font-size", "18");
           t.setAttribute("fill", "#e5e7eb");
           t.style.pointerEvents = "none";
           t.textContent = p.role;
@@ -288,10 +295,11 @@
           "href",
           "./badminton.svg"
         );
-        img.setAttribute("width", "80");
-        img.setAttribute("height", "80");
-        img.setAttribute("x", state.shuttle.x - 40);
-        img.setAttribute("y", state.shuttle.y - 40);
+        img.setAttribute("width", String(SHUTTLE_SIZE));
+        img.setAttribute("height", String(SHUTTLE_SIZE));
+        img.setAttribute("x", state.shuttle.x - SHUTTLE_R);
+        img.setAttribute("y", state.shuttle.y - SHUTTLE_R);
+        img.setAttribute("pointer-events", "bounding-box");
         img.style.filter = "url(#shadow)";
         img.setAttribute(
           "transform",
@@ -319,17 +327,21 @@
         const right = left + +outer.getAttribute("width");
         const bottom = top + +outer.getAttribute("height");
         return {
-          left: left + 20,
-          right: right - 20,
-          top: top + 20,
-          bottom: bottom - 20,
+          left: left + 30,
+          right: right - 30,
+          top: top + 30,
+          bottom: bottom - 30,
         };
       }
       function hitPlayer(x, y) {
-        return state.players.find((p) => Math.hypot(p.x - x, p.y - y) <= 24);
+        return state.players.find(
+          (p) => Math.hypot(p.x - x, p.y - y) <= PLAYER_HIT
+        );
       }
       function hitShuttle(x, y) {
-        return Math.hypot(state.shuttle.x - x, state.shuttle.y - y) <= 20;
+        return (
+          Math.hypot(state.shuttle.x - x, state.shuttle.y - y) <= SHUTTLE_HIT
+        );
       }
       function clamp(v, a, b) {
         return Math.max(a, Math.min(b, v));
