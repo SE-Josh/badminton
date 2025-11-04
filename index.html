@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>羽毛球戰術板 · 極簡 MVP</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --text: #e5e7eb;
+        --accent: #38bdf8;
+        --accent-2: #a78bfa;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Noto Sans, "Helvetica Neue", Arial;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 8px;
+        padding: 8px;
+      }
+      header {
+        background: linear-gradient(180deg, #0b1220, #0b1220cc);
+        border: 1px solid #1f2937;
+        border-radius: 14px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+      }
+      header h1 {
+        font-size: 16px;
+        margin: 0 4px 0 0;
+        color: #cbd5e1;
+        letter-spacing: 0.3px;
+      }
+      fieldset {
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        padding: 6px 10px;
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        background: #0b1220;
+      }
+      fieldset legend {
+        padding: 0 6px;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      label {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      input[type="radio"] {
+        accent-color: #38bdf8;
+      }
+      #canvasWrap {
+        background: #0b1220;
+        border: 1px solid #1f2937;
+        border-radius: 14px;
+        padding: 10px;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      #court {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        background: #0a0e1a;
+        border-radius: 10px;
+        box-shadow: inset 0 0 0 2px #1f2937, 0 10px 30px rgba(0, 0, 0, 0.35);
+        touch-action: none;
+      }
+      #court,
+      #court * {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-user-drag: none;
+      }
+      .tooltip {
+        position: fixed;
+        pointer-events: none;
+        background: #111827;
+        border: 1px solid #334155;
+        color: #e2e8f0;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 8px;
+        opacity: 0;
+        transform: translateY(-6px);
+        transition: opacity 0.12s, transform 0.12s;
+        white-space: nowrap;
+        z-index: 50;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🏸 羽毛球戰術板 · 極簡版</h1>
+      <fieldset>
+        <legend>模式</legend>
+        <label><input type="radio" name="mode" value="singles" /> 單打</label>
+        <label
+          ><input type="radio" name="mode" value="doubles" checked />
+          雙打</label
+        >
+      </fieldset>
+      <span style="font-size: 12px; color: #94a3b8"
+        >拖拉球員與羽毛球；裝置橫向＝水平、直立＝垂直</span
+      >
+    </header>
+
+    <div id="canvasWrap">
+      <svg
+        id="court"
+        viewBox="0 0 610 1340"
+        preserveAspectRatio="xMidYMid meet"
+        aria-label="Badminton Court"
+      >
+        <defs>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow
+              dx="0"
+              dy="2"
+              stdDeviation="2"
+              flood-color="#000"
+              flood-opacity="0.35"
+            />
+          </filter>
+        </defs>
+        <g id="root">
+          <!-- 背景 -->
+          <rect
+            x="5"
+            y="5"
+            width="600"
+            height="1330"
+            rx="14"
+            ry="14"
+            fill="#0a1728"
+            stroke="#2c3e50"
+            stroke-width="3"
+          />
+          <!-- BWF 比例線條 -->
+          <g
+            id="lines"
+            stroke="#bfe1ff"
+            stroke-width="4"
+            fill="none"
+            opacity="0.95"
+          >
+            <rect id="outer" x="40" y="40" width="530" height="1260" />
+            <line x1="40" y1="670" x2="570" y2="670" stroke-width="6" />
+            <line x1="86" y1="40" x2="86" y2="1300" stroke-dasharray="6 10" />
+            <line x1="524" y1="40" x2="524" y2="1300" stroke-dasharray="6 10" />
+            <line x1="40" y1="472" x2="570" y2="472" />
+            <line x1="40" y1="868" x2="570" y2="868" />
+            <line x1="305" y1="40" x2="305" y2="670" />
+            <line x1="305" y1="670" x2="305" y2="1300" />
+            <line x1="40" y1="116" x2="570" y2="116" stroke-dasharray="6 10" />
+            <line
+              x1="40"
+              y1="1224"
+              x2="570"
+              y2="1224"
+              stroke-dasharray="6 10"
+            />
+          </g>
+          <!-- 玩家與羽球圖層 -->
+          <g id="players"></g>
+          <g id="shuttleLayer"></g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="tooltip" id="tt"></div>
+
+    <script>
+      const court = document.getElementById("court");
+      const root = document.getElementById("root");
+      const playersLayer = document.getElementById("players");
+      const shuttleLayer = document.getElementById("shuttleLayer");
+      const tt = document.getElementById("tt");
+
+      const state = {
+        mode: "doubles",
+        players: [],
+        shuttle: { x: 305, y: 670 },
+      };
+
+      function initPlayersDoubles() {
+        state.players = [
+          { id: "A1", x: 200, y: 1000, role: "A1", team: "A" },
+          { id: "A2", x: 410, y: 1100, role: "A2", team: "A" },
+          { id: "B1", x: 200, y: 300, role: "B1", team: "B" },
+          { id: "B2", x: 410, y: 200, role: "B2", team: "B" },
+        ];
+      }
+      function initPlayersSingles() {
+        state.players = [
+          { id: "A", x: 305, y: 1050, role: "A", team: "A" },
+          { id: "B", x: 305, y: 290, role: "B", team: "B" },
+        ];
+      }
+
+      const radios = Array.from(
+        document.querySelectorAll('input[name="mode"]')
+      );
+      radios.forEach((r) =>
+        r.addEventListener("change", () => {
+          state.mode = document.querySelector(
+            'input[name="mode"]:checked'
+          ).value;
+          if (state.mode === "singles") initPlayersSingles();
+          else initPlayersDoubles();
+          render();
+        })
+      );
+
+      function adjustOrientation() {
+        const isLandscape = window.innerWidth > window.innerHeight;
+        if (isLandscape) {
+          court.setAttribute("viewBox", "0 0 1340 610");
+          root.setAttribute("transform", "translate(1340,0) rotate(90)");
+        } else {
+          court.setAttribute("viewBox", "0 0 610 1340");
+          root.removeAttribute("transform");
+        }
+      }
+      window.addEventListener("resize", adjustOrientation);
+      window.addEventListener("orientationchange", adjustOrientation);
+
+      function render() {
+        playersLayer.innerHTML = "";
+        for (const p of state.players) {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.style.filter = "url(#shadow)";
+          const color = p.team === "A" ? "var(--accent)" : "var(--accent-2)";
+          const c = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+          );
+          c.setAttribute("cx", p.x);
+          c.setAttribute("cy", p.y);
+          c.setAttribute("r", 22);
+          c.setAttribute("fill", "#0b1220");
+          c.setAttribute("stroke", color);
+          c.setAttribute("stroke-width", 4);
+          const t = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+          );
+          t.setAttribute("x", p.x);
+          t.setAttribute("y", p.y + 5);
+          t.setAttribute("text-anchor", "middle");
+          t.setAttribute("font-size", "14");
+          t.setAttribute("fill", "#e5e7eb");
+          t.style.pointerEvents = "none";
+          t.textContent = p.role;
+          g.appendChild(c);
+          g.appendChild(t);
+          playersLayer.appendChild(g);
+        }
+
+        shuttleLayer.innerHTML = "";
+        const img = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "image"
+        );
+        img.setAttributeNS(
+          "http://www.w3.org/1999/xlink",
+          "href",
+          "./badminton.svg"
+        );
+        img.setAttribute("width", "80");
+        img.setAttribute("height", "80");
+        img.setAttribute("x", state.shuttle.x - 40);
+        img.setAttribute("y", state.shuttle.y - 40);
+        img.style.filter = "url(#shadow)";
+        img.setAttribute(
+          "transform",
+          `rotate(270 ${state.shuttle.x} ${state.shuttle.y})`
+        );
+        shuttleLayer.appendChild(img);
+      }
+
+      let dragging = null;
+      court.addEventListener("pointerdown", onDown);
+      court.addEventListener("pointermove", onMove);
+      court.addEventListener("pointerup", onUp);
+      court.addEventListener("contextmenu", (e) => e.preventDefault());
+
+      function svgPoint(evt) {
+        const pt = court.createSVGPoint();
+        pt.x = evt.clientX;
+        pt.y = evt.clientY;
+        return pt.matrixTransform(root.getScreenCTM().inverse());
+      }
+      function getBounds() {
+        const outer = document.getElementById("outer");
+        const left = +outer.getAttribute("x");
+        const top = +outer.getAttribute("y");
+        const right = left + +outer.getAttribute("width");
+        const bottom = top + +outer.getAttribute("height");
+        return {
+          left: left + 20,
+          right: right - 20,
+          top: top + 20,
+          bottom: bottom - 20,
+        };
+      }
+      function hitPlayer(x, y) {
+        return state.players.find((p) => Math.hypot(p.x - x, p.y - y) <= 24);
+      }
+      function hitShuttle(x, y) {
+        return Math.hypot(state.shuttle.x - x, state.shuttle.y - y) <= 20;
+      }
+      function clamp(v, a, b) {
+        return Math.max(a, Math.min(b, v));
+      }
+
+      function onDown(e) {
+        e.preventDefault();
+        const p = svgPoint(e);
+        if (hitShuttle(p.x, p.y)) {
+          dragging = {
+            kind: "shuttle",
+            ox: p.x - state.shuttle.x,
+            oy: p.y - state.shuttle.y,
+          };
+          court.setPointerCapture(e.pointerId);
+          return;
+        }
+        const target = hitPlayer(p.x, p.y);
+        if (target) {
+          dragging = {
+            kind: "player",
+            id: target.id,
+            ox: p.x - target.x,
+            oy: p.y - target.y,
+          };
+          court.setPointerCapture(e.pointerId);
+        }
+      }
+      function onMove(e) {
+        e.preventDefault();
+        const p = svgPoint(e);
+        tt.style.left = e.clientX + 12 + "px";
+        tt.style.top = e.clientY - 10 + "px";
+        tt.textContent = `${Math.round(p.x)}, ${Math.round(p.y)}`;
+        tt.style.opacity = 0.7;
+        tt.style.transform = "translateY(0)";
+        if (!dragging) return;
+        const b = getBounds();
+        if (dragging.kind === "shuttle") {
+          state.shuttle.x = clamp(p.x - dragging.ox, b.left, b.right);
+          state.shuttle.y = clamp(p.y - dragging.oy, b.top, b.bottom);
+        } else {
+          const i = state.players.findIndex((x) => x.id === dragging.id);
+          state.players[i].x = clamp(p.x - dragging.ox, b.left, b.right);
+          state.players[i].y = clamp(p.y - dragging.oy, b.top, b.bottom);
+        }
+        render();
+      }
+      function onUp(e) {
+        tt.style.opacity = 0;
+        tt.style.transform = "translateY(-6px)";
+        if (dragging) {
+          dragging = null;
+          court.releasePointerCapture(e.pointerId);
+        }
+      }
+
+      (function main() {
+        initPlayersDoubles();
+        render();
+        adjustOrientation();
+      })();
+    </script>
+  </body>
+</html>
